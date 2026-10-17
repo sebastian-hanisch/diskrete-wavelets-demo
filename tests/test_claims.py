@@ -78,7 +78,7 @@ def test_preset_tone_in_the_band_middle_puts_71_percent_in_the_stage():
 def test_moment_numbers_in_the_readme():
     res = get("moments")
     by = {r["p"]: r["max"] for r in res["degrees"]}
-    assert max(max(by[p][:p]) for p in by) < 2e-15 and "höchstens 1,9e-15" in README and sci(max(max(by[p][:p]) for p in by)) == "1,9e-15"
+    assert max(max(by[p][:p]) for p in by) < 1e-14 and "unter 1e-14;" in README and "von unter 1e-14;" in ev.verdict_moments(get("moments"))[1]
     assert " / ".join(sci(v) for v in by[1][1:]) == "2,8e-03 / 5,4e-03 / 8,1e-03 / 1,1e-02" and "2,8e-3 / 5,4e-3 / 8,1e-3 / 1,1e-2" in README
     assert " / ".join(sci(v) for v in by[2][2:]) == "1,9e-05 / 5,5e-05 / 1,1e-04" and "1,9e-5 / 5,5e-5 / 1,1e-4" in README
     assert " / ".join(sci(v) for v in by[3][3:]) == "2,0e-07 / 7,8e-07" and "2,0e-7 / 7,8e-7" in README and sci(by[4][4]) == "2,9e-09" and "2,9e-9 bei Grad 4" in README

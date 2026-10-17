@@ -266,7 +266,8 @@ def verdict_moments(res: dict) -> tuple[str, str]:
     jump = {r["p"]: r for r in res["jump"]}
     below = max(max(by[p]["max"][:p]) for p in by)
     grows = f"{by[2]['max'][2]:.1e}".replace(".", ",")
-    return "info", (f"Polynome vom Grad kleiner als p ergeben im Inneren Detailkoeffizienten von höchstens {below:.0e}; ab Grad p wachsen sie (bei p = 2 und Grad 2: {grows}). "
+    bound = "unter 1e-14" if below < 1e-14 else f"höchstens {below:.0e}"
+    return "info", (f"Polynome vom Grad kleiner als p ergeben im Inneren Detailkoeffizienten von {bound}; ab Grad p wachsen sie (bei p = 2 und Grad 2: {grows}). "
                     f"Bei einem Sinus mit Sprung tragen die {C.SPARSE_TOP} größten Koeffizienten {de(100 * jump[1]['top'], 1)} % der Energie bei Haar und {de(100 * jump[4]['top'], 1)} % bei p = 4. "
                     "**Mehr verschwindende Momente: glatte Teile werden null, nur der Sprung bleibt.**")
 

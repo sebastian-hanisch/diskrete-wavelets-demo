@@ -64,7 +64,7 @@ def test_verdict_moments_text():
            "jump": [{"p": 1, "count": 429, "total": 1024, "top": 0.9539}, {"p": 4, "count": 73, "total": 1024, "top": 0.9932}]}
     kind, text = ev.verdict_moments(res)
     assert kind == "info"
-    assert text == ("Polynome vom Grad kleiner als p ergeben im Inneren Detailkoeffizienten von höchstens 2e-15; ab Grad p wachsen sie (bei p = 2 und Grad 2: 1,9e-05). "
+    assert text == ("Polynome vom Grad kleiner als p ergeben im Inneren Detailkoeffizienten von unter 1e-14; ab Grad p wachsen sie (bei p = 2 und Grad 2: 1,9e-05). "
                     "Bei einem Sinus mit Sprung tragen die 16 größten Koeffizienten 95,4 % der Energie bei Haar und 99,3 % bei p = 4. **Mehr verschwindende Momente: glatte Teile werden null, nur der Sprung bleibt.**")
 
 
@@ -112,4 +112,6 @@ def test_trend_hint_for_haar_starts_just_above_twenty_standard_deviations():
 def test_verdict_moments_uses_the_largest_of_the_inner_maxima():
     res = {"degrees": [{"p": 2, "max": [1e-16, 2e-16, 1.869e-05, 5.5e-05, 1.1e-04]}, {"p": 3, "max": [1e-15, 3e-15, 5e-15, 2e-7, 8e-7]}, {"p": 8, "max": [1.8e-15] * 5}],
            "jump": [{"p": 1, "count": 429, "total": 1024, "top": 0.9539}, {"p": 4, "count": 73, "total": 1024, "top": 0.9932}]}
-    assert "von höchstens 5e-15;" in ev.verdict_moments(res)[1]
+    assert "von unter 1e-14;" in ev.verdict_moments(res)[1]
+    res["degrees"][1]["max"] = [1e-15, 3e-15, 5e-13, 2e-7, 8e-7]
+    assert "von höchstens 5e-13;" in ev.verdict_moments(res)[1]
