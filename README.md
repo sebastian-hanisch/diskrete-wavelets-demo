@@ -11,15 +11,15 @@ Skalogramm**. Fünf Testsignale mit exakter Wahrheit (Potenzgesetz-Rauschen, Spr
 ## Warum dieses Problem
 
 Das kontinuierliche Skalogramm ist redundant und stark korreliert. Die DWT wählt nur Zweierpotenz-Skalen und ein Raster und zerlegt eine Reihe der Länge 2^J exakt und ohne Redundanz; Filter mit p verschwindenden Momenten
-machen glatte Teile zu null. Der Preis ist die Verschiebungsvarianz: Schiebt man die Reihe, ändern sich die Koeffizienten. Die MODWT lässt das Halbieren weg und ist verschiebungsinvariant. Die Wavelet-Varianz (mittlere
-Energie je Stufe) ist das Skalenspektrum: Bei Potenzgesetz-Rauschen liest man den Exponenten an ihrer Steigung ab, auch bei einem Trend, wenn das Wavelet genug verschwindende Momente hat.
+machen Polynome vom Grad kleiner als p zu null und glatte Teile nahezu null. Der Preis ist die Verschiebungsvarianz: Schiebt man die Reihe, ändern sich die Koeffizienten. Die MODWT lässt das Halbieren weg und ist verschiebungsinvariant. Die Wavelet-Varianz (mittlere
+Energie je Stufe) ist das Skalenspektrum: Bei Potenzgesetz-Rauschen liest man den Exponenten an ihrer Steigung ab, auch bei einem Trend, wenn das Wavelet genug verschwindende Momente hat und die vom periodischen Rand betroffenen Koeffizienten verworfen werden.
 
 ## Modell
 
 Testsignale auf den Zeitpunkten t = 0 … n − 1 (Abtastrate 1): zirkulär stationäres Gauß-Rauschen mit Spektrum ∝ f^−α (Spektralsynthese), ein Sinus mit Sprung, ein Einzelimpuls, ein Ton, Potenzgesetz-Rauschen plus ein
 linearer Trend. Daubechies-Skalierungsfilter h der Länge 2p per Spektralfaktorisierung, Wavelet-Filter g[l] = (−1)^l h[2p − 1 − l]. DWT als periodische Pyramide (c[k] = Σ h[l] a[2k + l]), MODWT per FFT (Filter h/√2,
 jede Länge), Mehrskalenanalyse x = S_J + Σ D_j, Wavelet-Varianz als Mittel von W_j² (MODWT, auf Wunsch ohne die vom periodischen Rand betroffenen Koeffizienten) bzw. von d_j²/2^j (DWT). Der Exponent ist die Steigung von
-log₂ ν̂² gegen die Stufe plus 1, angepasst über die Stufen 2 bis J, solange n/2^j mindestens 32 ist. Alles selbst in numpy; scipy dient nur als Gegenprobe in den Tests.
+log₂ ν̂² gegen die Stufe plus 1, angepasst über die Stufen 2 bis J, solange n/2^j mindestens 32 ist. Alles selbst in numpy; die Gegenproben in den Tests sind Summendefinition, Matrixform und geschlossene Formeln (scipy wird nicht gebraucht).
 
 ## Methodik
 
@@ -34,12 +34,12 @@ Alle Zahlen stehen in `tests/test_claims.py` und `tests/test_experiments_golden.
 |---|---|
 | Wie genau ist die Zerlegung? | Rekonstruktion und Energieerhaltung gelten für DWT und MODWT auf 1e-12 und besser (n = 64 bis 512, 1 bis 9 Stufen, p = 1, 2, 4, 8), die MODWT auch bei n = 300. Mini-Instanz Haar, x = (1, 2, 3, 4): d = −1/√2 je Wert, a = (3/√2, 7/√2), zweite Stufe d = −2, a = 5. |
 | Was bringen verschwindende Momente (n = 256, Stufe 1, innere Detailkoeffizienten)? | Polynome vom Grad kleiner als p ergeben unter 1e-14; ab dem Grad p wachsen sie: p = 1: 2,8e-3 / 5,4e-3 / 8,1e-3 / 1,1e-2 bei Grad 1 bis 4; p = 2: 1,9e-5 / 5,5e-5 / 1,1e-4 bei Grad 2 bis 4; p = 3: 2,0e-7 / 7,8e-7 bei Grad 3 und 4; p = 4: 2,9e-9 bei Grad 4. |
-| Wie sparsam ist ein Sinus mit Sprung (n = 1024, 6 Stufen)? | Koeffizienten über dem 1e-3-Fachen des größten bei p = 1 / 2 / 4 / 8: 429 / 127 / 73 / 91 von 1024; die 16 größten tragen 95,4 / 98,7 / 99,3 / 99,3 % der Energie. |
+| Wie sparsam ist ein Sinus mit Sprung (n = 1024, 6 Stufen)? | Koeffizienten über dem 1e-3-Fachen des größten bei p = 1 / 2 / 4 / 8: 429 / 127 / 73 / 91 von 1024; die 16 größten tragen 95,4 / 98,7 / 99,3 / 99,3 % der Energie; es bleiben die beiden Sprünge (der gesetzte und der des periodischen Randes), über p = 4 hinaus gibt es hier keinen weiteren Gewinn. |
 | Wie verschiebungsvariant ist die DWT (n = 256, 5 Stufen, D4, 16 Verschiebungen)? | Der Energieanteil einer Stufe ändert sich bei einem Impuls um bis zu 0,53 (Stufe 1 bis 5 und Glättung: 0,433 / 0,526 / 0,301 / 0,174 / 0,091 / 0,025), bei einem Ton der Frequenz 0,07 um bis zu 0,036 und bei 0,1 um bis zu 0,044. Bei der MODWT bleiben alle Anteile gleich (Änderung unter 1e-12). |
-| Wie gut ist der Exponent aus der Wavelet-Varianz (n = 4096, 9 Stufen, 200 Läufe)? | α̂ bei α = 0 / 0,5 / 1 mit MODWT D4: 0,002 ± 0,051 / 0,492 ± 0,048 / 0,995 ± 0,049; DWT D4: −0,002 ± 0,063 / 0,490 ± 0,058 / 0,996 ± 0,062; Periodogramm (GPH, m = 64): −0,008 ± 0,177 / 0,518 ± 0,184 / 1,026 ± 0,181. Die Streuung ist mit der Wavelet-Varianz etwa 4-mal kleiner. |
+| Wie gut ist der Exponent aus der Wavelet-Varianz (n = 4096, 9 Stufen, 200 Läufe)? | α̂ bei α = 0 / 0,5 / 1 mit MODWT D4: 0,002 ± 0,051 / 0,492 ± 0,048 / 0,995 ± 0,049; DWT D4: −0,002 ± 0,063 / 0,490 ± 0,058 / 0,996 ± 0,062; Periodogramm (GPH, m = 64): −0,008 ± 0,177 / 0,518 ± 0,184 / 1,026 ± 0,181. Die Streuung ist mit der Wavelet-Varianz etwa 4-mal kleiner als beim Periodogramm mit m = 64; bei viel größerem m (ab etwa 1000) und exaktem Potenzgesetz ist die Streuung des Periodogramms kleiner als die der Wavelet-Varianz. |
 | Was macht ein linearer Trend von 100 Standardabweichungen (α = 0,5)? | MODWT ohne die vom Rand betroffenen Koeffizienten: Haar 1,264 ± 0,014, p = 2 / 3 / 4: 0,483 / 0,483 / 0,482 (± 0,052 / 0,055 / 0,057); ohne Trend 0,484 / 0,496 / 0,498 bei p = 1 / 2 / 3. Die periodische DWT sieht den Sprung am Rand: 1,263 / 1,910 / 1,908 / 1,872 bei p = 1 bis 4; das Periodogramm: 2,000 ± 0,010. |
 | Sind die Stufen scharfe Frequenzbänder (MODWT, Ton in der Bandmitte)? | Nein: Der Anteil der Energie in der Stufe 2 / 3 / 4 beträgt bei Haar 59,0 / 54,0 / 52,9 %, bei D4 72,8 / 71,3 / 71,3 %, bei D8 85,3 / 85,2 / 85,2 %, bei D16 94,1 % in allen drei. An den Bandrändern (f = 1/16 und 1/8) beträgt der Leistungsgang der Stufe 3 0,41 / 0,43 (Haar), 0,47 / 0,47 (D4), 0,49 / 0,49 (D8) und 0,50 (D16). |
-| Wie stark streut der Schätzer der Wavelet-Varianz (weißes Rauschen, n = 1024, 500 Läufe, D4)? | Relative Standardabweichung auf Stufe 1 bis 6: DWT 0,064 / 0,087 / 0,128 / 0,175 / 0,229 / 0,350, MODWT 0,057 / 0,064 / 0,089 / 0,125 / 0,166 / 0,236, das 1,11- bis 1,49-Fache; beide Schätzer sind unverzerrt (2^−j: 0,500 / 0,249 / 0,125 / 0,062 / 0,031 / 0,016). Die MODWT hat 7168 statt 1024 Koeffizienten. |
+| Wie stark streut der Schätzer der Wavelet-Varianz (weißes Rauschen, n = 1024, 500 Läufe, D4)? | Relative Standardabweichung auf Stufe 1 bis 6: DWT 0,064 / 0,087 / 0,128 / 0,175 / 0,229 / 0,350, MODWT 0,057 / 0,064 / 0,089 / 0,125 / 0,166 / 0,236, das 1,11- bis 1,49-Fache; beide Schätzer sind im Mittel unverzerrt (gemessene Mittel 0,500 / 0,249 / 0,125 / 0,062 / 0,031 / 0,016 gegen 2^−j). Die MODWT hat 7168 statt 1024 Koeffizienten. |
 
 ## Ehrliche Grenzen
 
@@ -79,7 +79,7 @@ Alle Zahlen stehen in `tests/test_claims.py` und `tests/test_experiments_golden.
 | `dwt_visualization.py` | Plotly-Abbildungen (Achsen gesperrt) |
 | `dwt_pdf_export.py` | PDF der aktuellen Einstellung (erst nach Klick) |
 | `requirements.txt` | Laufzeit-Bibliotheken (ungepinnt) |
-| `requirements-dev.txt` | Laufzeit plus pytest und scipy (nur Gegenproben) |
+| `requirements-dev.txt` | Laufzeit plus pytest und scipy (von den Tests derzeit nicht gebraucht) |
 | `tests/` | Kern, Orakel, Signale, Zahlen, Verdikte, Presets, Randfälle, AppTest, Footer, Laufzeit-Importe |
 
 ## Bewusst nicht umgesetzt

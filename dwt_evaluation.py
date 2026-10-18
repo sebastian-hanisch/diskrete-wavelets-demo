@@ -269,7 +269,7 @@ def verdict_moments(res: dict) -> tuple[str, str]:
     bound = "unter 1e-14" if below < 1e-14 else f"höchstens {below:.0e}"
     return "info", (f"Polynome vom Grad kleiner als p ergeben im Inneren Detailkoeffizienten von {bound}; ab Grad p wachsen sie (bei p = 2 und Grad 2: {grows}). "
                     f"Bei einem Sinus mit Sprung tragen die {C.SPARSE_TOP} größten Koeffizienten {de(100 * jump[1]['top'], 1)} % der Energie bei Haar und {de(100 * jump[4]['top'], 1)} % bei p = 4. "
-                    "**Mehr verschwindende Momente: glatte Teile werden null, nur der Sprung bleibt.**")
+                    "**Mehr verschwindende Momente: glatte Teile werden (fast) null, es bleiben die beiden Sprünge (der gesetzte und der des periodischen Randes); über p = 4 hinaus gibt es in dieser Messung keinen weiteren Gewinn.**")
 
 
 def verdict_shift(rows: list[dict]) -> tuple[str, str]:
@@ -284,8 +284,8 @@ def verdict_alpha(res: dict) -> tuple[str, str]:
     mod, gph = get(0.5, "MODWT", 2), get(0.5, "GPH", 0)
     trend = {r["p"]: r for r in res["trend"]}
     return "info", (f"Bei α = 0,5 schätzt die MODWT (D4) {de(mod['mean'], 2)} ± {de(mod['sd'], 2)}, das Periodogramm {de(gph['mean'], 2)} ± {de(gph['sd'], 2)}; die Streuung ist mit der Wavelet-Varianz etwa "
-                    f"{de(gph['sd'] / mod['sd'], 0)}-mal kleiner. Mit einem linearen Trend von {de(res['trend_sd'], 0)} Standardabweichungen bleibt die MODWT mit p = 2 bei {de(trend[2]['inner_mean'], 2)}, Haar steigt auf "
-                    f"{de(trend[1]['inner_mean'], 2)} und das Periodogramm auf {de(res['trend_gph'][0], 2)}. **Verschwindende Momente schützen den Exponenten vor dem Trend.**")
+                    f"{de(gph['sd'] / mod['sd'], 0)}-mal kleiner als beim Periodogramm mit m = {C.EXP_GPH_M}. Mit einem linearen Trend von {de(res['trend_sd'], 0)} Standardabweichungen bleibt die MODWT mit p = 2 bei {de(trend[2]['inner_mean'], 2)}, Haar steigt auf "
+                    f"{de(trend[1]['inner_mean'], 2)} und das Periodogramm auf {de(res['trend_gph'][0], 2)}. **Verschwindende Momente schützen den Exponenten vor dem Trend, wenn die vom periodischen Rand betroffenen Koeffizienten verworfen werden.**")
 
 
 def verdict_bands(rows: list[dict]) -> tuple[str, str]:

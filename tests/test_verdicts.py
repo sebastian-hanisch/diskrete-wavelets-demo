@@ -65,7 +65,7 @@ def test_verdict_moments_text():
     kind, text = ev.verdict_moments(res)
     assert kind == "info"
     assert text == ("Polynome vom Grad kleiner als p ergeben im Inneren Detailkoeffizienten von unter 1e-14; ab Grad p wachsen sie (bei p = 2 und Grad 2: 1,9e-05). "
-                    "Bei einem Sinus mit Sprung tragen die 16 größten Koeffizienten 95,4 % der Energie bei Haar und 99,3 % bei p = 4. **Mehr verschwindende Momente: glatte Teile werden null, nur der Sprung bleibt.**")
+                    "Bei einem Sinus mit Sprung tragen die 16 größten Koeffizienten 95,4 % der Energie bei Haar und 99,3 % bei p = 4. **Mehr verschwindende Momente: glatte Teile werden (fast) null, es bleiben die beiden Sprünge (der gesetzte und der des periodischen Randes); über p = 4 hinaus gibt es in dieser Messung keinen weiteren Gewinn.**")
 
 
 def test_verdict_shift_text():
@@ -84,8 +84,8 @@ def test_verdict_alpha_text():
     res = {"stationary": st, "trend": [{"p": 1, "inner_mean": 1.264}, {"p": 2, "inner_mean": 0.483}], "trend_sd": 100.0, "trend_gph": (2.0, 0.01)}
     kind, text = ev.verdict_alpha(res)
     assert kind == "info"
-    assert text == ("Bei α = 0,5 schätzt die MODWT (D4) 0,49 ± 0,05, das Periodogramm 0,52 ± 0,18; die Streuung ist mit der Wavelet-Varianz etwa 4-mal kleiner. Mit einem linearen Trend von 100 Standardabweichungen "
-                    "bleibt die MODWT mit p = 2 bei 0,48, Haar steigt auf 1,26 und das Periodogramm auf 2,00. **Verschwindende Momente schützen den Exponenten vor dem Trend.**")
+    assert text == ("Bei α = 0,5 schätzt die MODWT (D4) 0,49 ± 0,05, das Periodogramm 0,52 ± 0,18; die Streuung ist mit der Wavelet-Varianz etwa 4-mal kleiner als beim Periodogramm mit m = 64. Mit einem linearen Trend von 100 Standardabweichungen "
+                    "bleibt die MODWT mit p = 2 bei 0,48, Haar steigt auf 1,26 und das Periodogramm auf 2,00. **Verschwindende Momente schützen den Exponenten vor dem Trend, wenn die vom periodischen Rand betroffenen Koeffizienten verworfen werden.**")
 
 
 def test_verdict_bands_text():

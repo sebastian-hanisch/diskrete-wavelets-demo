@@ -63,7 +63,7 @@ st.markdown(
     """
 Das kontinuierliche Skalogramm der vorigen Demo ist redundant: Benachbarte Zellen sind stark korreliert. Die **diskrete Wavelet-Transformation (DWT)** wählt nur Zweierpotenz-Skalen und ein Raster und zerlegt eine Reihe der
 Länge $2^J$ **exakt und ohne Redundanz**: Ein Paar Filter ($h$ glättet, $g$ nimmt die Differenz) wird auf die Reihe angewandt und halbiert ihre Länge, dann auf die Glättung, und so weiter (die **Pyramide**). Daubechies-Filter mit $p$
-verschwindenden Momenten machen glatte Teile zu null. Der Preis: Die DWT ist **nicht verschiebungsinvariant**; die **MODWT** lässt das Halbieren weg und ist es. Die **Wavelet-Varianz** (mittlere Energie je Stufe) ist das
+verschwindenden Momenten machen Polynome vom Grad kleiner als $p$ zu null und glatte Teile nahezu null. Der Preis: Die DWT ist **nicht verschiebungsinvariant**; die **MODWT** lässt das Halbieren weg und ist es. Die **Wavelet-Varianz** (mittlere Energie je Stufe) ist das
 Skalenspektrum: Aus ihrer Steigung liest man den Exponenten von Potenzgesetz-Rauschen ab.
 
 Dies ist die zwölfte Demo der Reihe „Spektral- und Wavelet-Analyse“, auf das **Skalogramm** aufbauend; sie liefert die Koeffizienten, auf denen die Wavelet-Schrumpfung danach Schwellwerte setzt. Alles ist **simuliert**: Signale
@@ -76,7 +76,7 @@ with st.expander("So entsteht die Zerlegung", expanded=True):
         """
 1. **Filterpaar:** Das Glättungsfilter $h$ (Länge $2p$) hat die Summe $\\sqrt 2$ und die Summe der Quadrate 1; das Wavelet-Filter ist $g[l] = (-1)^l h[2p - 1 - l]$ und hat $p$ verschwindende Momente.
 2. **Eine Stufe:** $c[k] = \\sum_l h[l]\\,a[2k + l]$ (Glättung) und $d[k] = \\sum_l g[l]\\,a[2k + l]$ (Detail), je mit der halben Länge (periodisch fortgesetzt). Die nächste Stufe arbeitet auf $c$.
-3. **Exakt:** Energie und Reihe sind ohne Verlust rekonstruierbar (Fehler um $10^{-15}$). Die **MODWT** behält alle $n$ Werte je Stufe und braucht $(J + 1)\\,n$ Koeffizienten.
+3. **Exakt:** Energie und Reihe sind ohne Verlust rekonstruierbar (Fehler höchstens etwa $10^{-14}$). Die **MODWT** behält alle $n$ Werte je Stufe und braucht $(J + 1)\\,n$ Koeffizienten.
 4. **Mehrskalenanalyse:** $x = S_J + \\sum_j D_j$: Jede Stufe liefert einen Anteil in der Zeitdomäne, der gesamte Satz addiert sich zum Signal.
         """
     )
@@ -232,7 +232,7 @@ getattr(st, kind_v)(text)
 
 st.markdown("#### Streuung der Wavelet-Varianz: MODWT gegen DWT")
 spread = _experiment("variance")
-st.caption(f"Weißes Rauschen (Varianz 1), n = {spread['n']}, {spread['levels']} Stufen, {spread['runs']} Läufe, D4: relative Standardabweichung des Schätzers ν̂²_j; Erwartung beider Schätzer 2^−j (unverzerrt).")
+st.caption(f"Weißes Rauschen (Varianz 1), n = {spread['n']}, {spread['levels']} Stufen, {spread['runs']} Läufe, D4: relative Standardabweichung des Schätzers ν̂²_j; Erwartung beider Schätzer 2^−j (im Mittel unverzerrt).")
 st.dataframe(pd.DataFrame([{"Stufe": j, "DWT": de(d, 3), "MODWT": de(m, 3), "Verhältnis": de(r, 2), "Erwartung (DWT)": de(e1, 4), "Erwartung (MODWT)": de(e2, 4)}
                            for j, (d, m, r, e1, e2) in enumerate(zip(spread["dwt_rel"], spread["modwt_rel"], spread["ratio"], spread["dwt_mean"], spread["modwt_mean"]), start=1)]), hide_index=True, width="stretch")
 st.plotly_chart(build_variance_spread(spread), width="stretch", key="exp_spread")
@@ -248,9 +248,9 @@ st.markdown(
     """
 | Annahme | Was passiert, wenn sie verletzt ist | Wer setzt an |
 |---|---|---|
-| **Die Zerlegung ist verschiebungsinvariant** | Die DWT ändert ihre Energieanteile je Stufe bei jeder Verschiebung (bei einem Impuls bis über 0,5); die MODWT bleibt gleich, braucht aber (J + 1)-mal so viele Koeffizienten. | MODWT, Cycle Spinning |
+| **Die Zerlegung ist verschiebungsinvariant** | Die DWT ändert ihre Energieanteile je Stufe bei fast jeder Verschiebung (nicht bei Vielfachen von 2^J); bei einem Impuls bis über 0,5; die MODWT bleibt gleich, braucht aber (J + 1)-mal so viele Koeffizienten. | MODWT, Cycle Spinning |
 | **Die Reihe ist zirkulär** | Die periodische Fortsetzung macht aus einem Trend einen Sprung am Rand; die Exponentenschätzung wird stark verzerrt (1,3 bis 1,9 statt 0,5). | Randkoeffizienten verwerfen, Spiegeln (nicht gebaut) |
-| **Ein verschwindendes Moment genügt** | Haar nullt nur Konstanten: Ein starker linearer Trend verfälscht die Wavelet-Varianz; ab p = 2 bleibt sie unverändert. | größeres p |
+| **Ein verschwindendes Moment genügt** | Haar nullt nur Konstanten: Ein starker linearer Trend verfälscht die Wavelet-Varianz; ab p = 2 bleibt sie unverändert, wenn die vom periodischen Rand betroffenen Koeffizienten verworfen werden (MODWT). | größeres p |
 | **Das Potenzgesetz ist stationär** | Die Wavelet-Varianz gilt für Spektren ∝ f^−α nur mit α < 2p + 1; sonst ist sie verfälscht. | größeres p |
 | **Stufen sind Frequenzbänder** | Die Filter sind nicht scharf: Ein Ton in der Bandmitte liefert nur 54 % (Haar) bis 94 % (D16) der Energie in der Stufe, der Rest liegt in den Nachbarstufen. | Wavelet-Pakete (nicht gebaut) |
 | **Die Länge ist 2^J** | Die DWT braucht eine durch 2^J teilbare Länge; die MODWT hat diese Bindung nicht. | MODWT |

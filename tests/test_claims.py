@@ -94,6 +94,13 @@ def test_sparsity_numbers_in_the_readme():
 # --- Verschiebungsvarianz ----------------------------------------------------------------------------------------------------------------------
 
 
+def test_dwt_shift_by_a_multiple_of_two_to_the_j_changes_nothing_and_other_shifts_do():
+    base = dict(n=256, signal="Impuls", p1=0.04, p=2, levels=5, transform="DWT")
+    assert all(ev.analyse(ev.Settings(**base, shift=k)).shift_change < 1e-9 for k in (0, 32, 64))
+    assert ev.analyse(ev.Settings(**base, shift=1)).shift_change > 0.4 and ev.analyse(ev.Settings(**base, shift=31)).shift_change > 0.5
+    assert "(nicht bei Vielfachen von 2^J)" in APP
+
+
 def test_shift_numbers_in_the_readme():
     rows = {r["name"]: r for r in get("shift")}
     imp = rows["Impuls"]["dwt"]
@@ -118,6 +125,18 @@ def test_alpha_numbers_in_the_readme():
     assert round(by[(0.5, "GPH", 0)]["sd"] / by[(0.5, "MODWT", 2)]["sd"]) == 4 and "etwa 4-mal kleiner" in README and "etwa 4-mal kleiner" in ev.verdict_alpha(res)[1]
     assert (res["n"], res["levels"], res["runs"], C.EXP_GPH_M, C.EXP_SEED) == (4096, 9, 200, 64, 960000) and "Seed 960000" in README and "200 Läufe bei der Exponentenschätzung, 500 bei der Streuung" in README
     assert all(abs(r["mean"] - r["alpha"]) < 0.05 for r in res["stationary"] if r["estimator"] != "GPH")
+
+
+def test_gph_beats_the_wavelet_variance_only_for_large_m_at_an_exact_power_law():
+    import signal_generator as G
+    import dwt_signals as S
+    res = get("alpha")
+    sd_mod = {r["alpha"]: r for r in res["stationary"] if r["estimator"] == "MODWT" and r["p"] == 2}[0.5]["sd"]
+    rng = G.SplitMix64(C.EXP_SEED + 5)
+    xs = [S.power_law(C.EXP_ALPHA_N, 0.5, rng) for _ in range(C.EXP_ALPHA_RUNS)]
+    sd = {m: float(np.std([T.gph_alpha(x, m) for x in xs])) for m in (64, 512, 1024)}
+    assert sd[64] > 3 * sd_mod and sd[512] > sd_mod and sd[1024] < sd_mod
+    assert "als beim Periodogramm mit m = 64; bei viel größerem m (ab etwa 1000)" in README and "mit m = 64" in ev.verdict_alpha(res)[1]
 
 
 def test_trend_numbers_in_the_readme():
