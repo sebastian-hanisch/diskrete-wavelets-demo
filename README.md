@@ -1,7 +1,6 @@
 # Diskrete Wavelets und Mehrskalenanalyse: exakt zerlegt, aber verschiebungsvariant – und die Wavelet-Varianz als Skalenspektrum – Streamlit-Demo
 
-<!-- TODO nach dem Deploy: direkt hierher den Live-Link setzen (Leerzeile davor und danach):
-**[→ Demo live ausprobieren](https://sebastianhanisch-diskrete-wavelets-demo.streamlit.app/)** -->
+**[→ Demo live ausprobieren](https://sebastianhanisch-diskrete-wavelets-demo.streamlit.app/)**
 
 Zwölfte Demo der Reihe **Spektral- und Wavelet-Analyse** in der „Konzepte“-Reihe für die Website „Sebastian Hanisch – Operations Research und Machine Learning“, aufbauend auf der Demo zum **kontinuierlichen
 Skalogramm**. Fünf Testsignale mit exakter Wahrheit (Potenzgesetz-Rauschen, Sprung im glatten Signal, Impuls, Ton, Trend plus Rauschen) werden mit der **diskreten Wavelet-Transformation (DWT)** und der überlappenden
@@ -112,4 +111,4 @@ Gebaut mit Streamlit, Plotly, NumPy, pandas und fpdf2.
 
 ---
 
-Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zu den Demos: [Interaktive Demos](https://sebastianhanisch.net/demos.html).
+Diese Demo ist Teil des Portfolios von [Sebastian Hanisch](https://sebastianhanisch.net) – Operations Research und Machine Learning ([Über mich](https://sebastianhanisch.net/ueber-mich.html)). Mehr zur Reihe: [Spektren und Wavelets: von Fourier zum Vergleich](https://sebastianhanisch.net/konzepte-spektral-wavelet-analyse.html).
